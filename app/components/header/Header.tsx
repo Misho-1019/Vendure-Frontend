@@ -43,9 +43,9 @@ export function Header({
           <div>
             <Link
               to={isSignedIn ? '/account' : '/sign-in'}
-              className="flex space-x-1"
+              className="flex space-x-1 text-brand hover:text-brand/80"
             >
-              <UserIcon className="w-4 h-4"></UserIcon>
+              <UserIcon className="w-4 h-4 text-brand"></UserIcon>
               <span>
                 {isSignedIn ? t('account.myAccount') : t('account.signIn')}
               </span>
