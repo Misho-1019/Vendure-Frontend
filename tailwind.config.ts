@@ -1,3 +1,4 @@
+// tailwind.config.ts
 import colors from 'tailwindcss/colors';
 import type { Config } from 'tailwindcss';
 
@@ -9,6 +10,9 @@ export default {
   theme: {
     extend: {
       colors: {
+        // 👇 new: points to the runtime CSS variable from root.tsx
+        brand: 'var(--color-primary)',
+        // your existing palettes stay as-is
         primary: colors.sky,
         secondary: colors.emerald,
       },
