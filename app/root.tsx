@@ -15,6 +15,7 @@ import {
   MetaFunction,
 } from '@remix-run/react';
 import stylesheet from './tailwind.css';
+import brandCss from './styles/brand.css';
 import { Header } from './components/header/Header';
 import {
   DataFunctionArgs,
@@ -43,6 +44,7 @@ export const meta: MetaFunction = () => {
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: stylesheet },
   ...(cssBundleHref ? [{ rel: 'stylesheet', href: cssBundleHref }] : []),
+  { rel: 'stylesheet', href: brandCss }, // load last so it overrides
 ];
 
 const devMode =
