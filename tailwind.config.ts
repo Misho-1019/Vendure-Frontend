@@ -10,9 +10,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 👇 new: points to the runtime CSS variable from root.tsx
-        brand: 'var(--color-primary)',
-        // your existing palettes stay as-is
+        // TS-safe and supports `bg-brand/80`, `text-brand/90`, etc.
+        brand: 'rgb(var(--color-primary-rgb) / <alpha-value>)',
+
+        // keep your existing palettes
         primary: colors.sky,
         secondary: colors.emerald,
       },

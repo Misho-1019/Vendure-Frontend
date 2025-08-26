@@ -1,6 +1,6 @@
 :root {
-  /* Fallback; will be overridden by inline style from root.tsx */
   --color-primary: #3b82f6;
+  --color-primary-rgb: 59 130 246; /* #3b82f6 */
 }
 
 /* Use the brand color wherever you like */

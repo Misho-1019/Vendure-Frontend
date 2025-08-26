@@ -108,6 +108,18 @@ function isOrder(x: any): x is Order {
   return !!x && typeof x.id === 'string' && typeof x.code === 'string';
 }
 
+// add once above App()
+function hexToRgb(hex: string): string {
+  let h = hex.replace('#', '');
+  if (h.length === 3)
+    h = h
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  const n = parseInt(h, 16);
+  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+}
+
 export default function App() {
   const [open, setOpen] = useState(false);
   const loaderData = useLoaderData<RootLoaderData>();
@@ -133,6 +145,8 @@ export default function App() {
   const pageTitle = theme?.title ?? APP_META_TITLE;
   const primaryColor = theme?.primaryColor ?? '#3b82f6';
 
+  const primaryRgb = hexToRgb(primaryColor);
+
   return (
     <html lang={locale} dir={i18n.dir()} id="app">
       <head>
@@ -145,7 +159,12 @@ export default function App() {
         <title>{pageTitle}</title>
       </head>
       {/* 👇 make primary color available to all CSS via var */}
-      <body style={{ ['--color-primary' as any]: primaryColor }}>
+      <body
+        style={{
+          ['--color-primary' as any]: primaryColor,
+          ['--color-primary-rgb' as any]: primaryRgb,
+        }}
+      >
         <Header
           onCartIconClick={() => setOpen(!open)}
           cartQuantity={activeOrder?.totalQuantity ?? 0}
