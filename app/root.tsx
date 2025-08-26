@@ -1,4 +1,5 @@
 import { cssBundleHref } from '@remix-run/css-bundle';
+import type { Order } from '~/generated/graphql';
 import {
   isRouteErrorResponse,
   Link,
@@ -31,6 +32,9 @@ import { useActiveOrder } from '~/utils/use-active-order';
 import { useChangeLanguage } from 'remix-i18next';
 import { useTranslation } from 'react-i18next';
 import { getI18NextServer } from '~/i18next.server';
+
+// 👇 new: fetch siteTheme (title, primaryColor) from Vendure
+import { getTheme, type SiteTheme } from './theme.server';
 
 export const meta: MetaFunction = () => {
   return [{ title: APP_META_TITLE }, { description: APP_META_DESCRIPTION }];
@@ -70,9 +74,11 @@ export type RootLoaderData = {
   activeChannel: Awaited<ReturnType<typeof activeChannel>>;
   collections: Awaited<ReturnType<typeof getCollections>>;
   locale: string;
+  // 👇 new
+  theme: SiteTheme | null;
 };
 
-export async function loader({ request, params, context }: DataFunctionArgs) {
+export async function loader({ request }: DataFunctionArgs) {
   const collections = await getCollections(request, { take: 20 });
   const topLevelCollections = collections.filter(
     (collection) => collection.parent?.name === '__root_collection__',
@@ -81,21 +87,29 @@ export async function loader({ request, params, context }: DataFunctionArgs) {
   const locale = await getI18NextServer().then((i18next) =>
     i18next.getLocale(request),
   );
+
+  // 👇 new: fetch theme safely (don’t break page if backend/env is down)
+  const theme = await getTheme().catch(() => null);
+
   const loaderData: RootLoaderData = {
     activeCustomer,
     activeChannel: await activeChannel({ request }),
     collections: topLevelCollections,
     locale,
+    theme,
   };
 
   return json(loaderData, { headers: activeCustomer._headers });
 }
 
+function isOrder(x: any): x is Order {
+  return !!x && typeof x.id === 'string' && typeof x.code === 'string';
+}
+
 export default function App() {
   const [open, setOpen] = useState(false);
   const loaderData = useLoaderData<RootLoaderData>();
-  const { collections } = loaderData;
-  const { locale } = useLoaderData<typeof loader>();
+  const { collections, locale, theme } = loaderData;
   const { i18n } = useTranslation();
   const {
     activeOrderFetcher,
@@ -113,6 +127,10 @@ export default function App() {
     refresh();
   }, [loaderData]);
 
+  // 👇 new: derive title + CSS color var
+  const pageTitle = theme?.title ?? APP_META_TITLE;
+  const primaryColor = theme?.primaryColor ?? '#3b82f6';
+
   return (
     <html lang={locale} dir={i18n.dir()} id="app">
       <head>
@@ -121,8 +139,11 @@ export default function App() {
         <link rel="icon" href="/favicon.ico" type="image/png"></link>
         <Meta />
         <Links />
+        {/* 👇 this will override the meta() title with CMS/Vendure title */}
+        <title>{pageTitle}</title>
       </head>
-      <body>
+      {/* 👇 make primary color available to all CSS via var */}
+      <body style={{ ['--color-primary' as any]: primaryColor }}>
         <Header
           onCartIconClick={() => setOpen(!open)}
           cartQuantity={activeOrder?.totalQuantity ?? 0}
@@ -137,13 +158,16 @@ export default function App() {
             }}
           />
         </main>
-        <CartTray
-          open={open}
-          onClose={setOpen}
-          activeOrder={activeOrder}
-          adjustOrderLine={adjustOrderLine}
-          removeItem={removeItem}
-        />
+        {isOrder(activeOrder) && (
+          <CartTray
+            open={open}
+            onClose={setOpen}
+            activeOrder={activeOrder}
+            adjustOrderLine={adjustOrderLine}
+            removeItem={removeItem}
+          />
+        )}
+
         <ScrollRestoration />
         <Scripts />
         <Footer collections={collections}></Footer>
@@ -209,7 +233,7 @@ function DefaultSparseErrorPage({
 }
 
 /**
- * As mentioned in the jsdoc for `DefaultSparseErrorPage` you should replace this to suit your needs.
+ * You should replace this to suit your needs.
  */
 export function ErrorBoundary() {
   let tagline = 'Oopsy daisy';
@@ -233,9 +257,7 @@ export function ErrorBoundary() {
 }
 
 /**
- * In Remix v2 there will only be a `ErrorBoundary`
- * As mentioned in the jsdoc for `DefaultSparseErrorPage` you should replace this to suit your needs.
- * Relevant for the future: https://remix.run/docs/en/main/route/error-boundary-v2
+ * In Remix v2 there will only be an ErrorBoundary.
  */
 export function CatchBoundary() {
   return ErrorBoundary();

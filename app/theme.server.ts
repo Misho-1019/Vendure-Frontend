@@ -1,7 +1,8 @@
 // app/theme.server.ts
 import { request, gql } from 'graphql-request';
 
-const SHOP_API = process.env.VENDURE_SHOP_API!;
+const SHOP_API = process.env.VENDURE_SHOP_API!; // e.g. http://localhost:3000/shop-api
+
 const Q = gql/* GraphQL */ `
   query Theme {
     siteTheme {
