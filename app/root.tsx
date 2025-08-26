@@ -239,7 +239,7 @@ function DefaultSparseErrorPage({
           <div className="mt-6">
             <Link
               to="/"
-              className="text-base font-medium text-primary-600 hover:text-primary-500 inline-flex gap-2"
+              className="text-base font-medium text-brand hover:text-brand/80 inline-flex gap-2"
             >
               Go back home
             </Link>
