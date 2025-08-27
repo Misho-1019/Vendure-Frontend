@@ -8,11 +8,16 @@ const Q = gql/* GraphQL */ `
     siteTheme {
       title
       primaryColor
+      accountHeading
     }
   }
 `;
 
-export type SiteTheme = { title: string; primaryColor: string };
+export type SiteTheme = {
+  title: string;
+  primaryColor: string;
+  accountHeading: string;
+};
 
 export async function getTheme(): Promise<SiteTheme> {
   const { siteTheme } = await request<{ siteTheme: SiteTheme }>(SHOP_API, Q);

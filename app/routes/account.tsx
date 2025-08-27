@@ -10,6 +10,7 @@ import { TabProps } from '~/components/tabs/Tab';
 import { TabsContainer } from '~/components/tabs/TabsContainer';
 import { getActiveCustomerDetails } from '~/providers/customer/customer';
 import { useTranslation } from 'react-i18next';
+import { useRootLoader } from '~/utils/use-root-loader';
 
 export async function loader({ request }: DataFunctionArgs) {
   const { activeCustomer } = await getActiveCustomerDetails({ request });
@@ -23,6 +24,7 @@ export default function AccountDashboard() {
   const { activeCustomer } = useLoaderData<typeof loader>();
   const { firstName, lastName } = activeCustomer!;
   const { t } = useTranslation();
+  const { theme } = useRootLoader();
 
   const tabs: TabProps[] = [
     {
@@ -49,8 +51,8 @@ export default function AccountDashboard() {
 
   return (
     <div className="max-w-6xl xl:mx-auto px-4">
-      <h2 className="text-3xl sm:text-5xl font-light text-gray-900 my-8">
-        {t('account.myAccount')}
+      <h2 className="text-3xl sm:text-5xl font-light text-brand my-8">
+        {theme?.accountHeading ?? t('account.myAccount')}
       </h2>
       <p className="text-gray-700 text-lg -mt-4">
         {t('account.welcomeBack')}, {firstName} {lastName}
